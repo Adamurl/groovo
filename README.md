@@ -1,4 +1,4 @@
-# 🎶 WIP (Working Title)
+# 🎶 GROOVO
 
 A social platform for music fans to log albums, share reviews, and discover new music.
 

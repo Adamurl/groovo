@@ -24,6 +24,7 @@ const handler = NextAuth({
   session: { strategy: "jwt" },
    // Stores stuff in MongoDB
   adapter: MongoDBAdapter(clientPromise),
+  pages: { signIn: "/login" },
   providers: [
     // OAuth with google (one of auth.js' providers (spotify is too (soundcloud isn't so we will have to route/config ourseleves))
     Google({

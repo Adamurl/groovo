@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Header from "../components/Header";
 
 export default function Discover() {
   const [results, setResults] = useState<any[]>([]);
@@ -20,12 +21,9 @@ export default function Discover() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
+      <Header />
       <div className="mx-auto max-w-7xl px-6 py-6">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md bg-violet-500" />
-            <span className="text-lg font-semibold tracking-tight">Groovo</span>
-          </div>
           <div className="flex items-center gap-4">
             <Link 
               href="/"

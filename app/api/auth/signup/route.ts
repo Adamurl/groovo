@@ -13,9 +13,6 @@ export const runtime = "nodejs";
  * - bcrypt: https://www.npmjs.com/package/bcrypt
  */
 
-
-
-
 export async function POST(req: Request) {
   try {
     // Expected payload 4 signup

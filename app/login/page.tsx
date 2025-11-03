@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import Header from "../components/Header";
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -25,13 +26,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
       {/* Top brand bar */}
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-md bg-violet-500" />
-          <span className="text-lg font-semibold tracking-tight">Groovo</span>
-        </div>
-      </div>
-
+      <Header />
       {/* Center card */}
       <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center px-6">
         <div className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900/60 p-8 shadow-2xl backdrop-blur">

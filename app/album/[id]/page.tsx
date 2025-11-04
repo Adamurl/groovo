@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "../../components/Header";
-import CompactTracklist, { formatDuration } from "../../components/CompactTracklist";
+import CompactTracklist from "../../components/CompactTracklist";
 import ReviewsPanel, { Review } from "../../components/ReviewsPanel";
+import ReviewDialog from "../../components/ReviewDialog";
 import { formatAlbumDate } from "../../utils/date";
 import { SpotifyAlbumWithTracks } from "@/app/types/spotify";
 
@@ -19,12 +20,14 @@ export default function AlbumPage({ params }: AlbumPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [albumId, setAlbumId] = useState<string | null>(null);
 
-  // Mock (client-only) reviews
-  const [reviews] = useState<Review[]>([
+  // reviews (client-only for now)
+  const [reviews, setReviews] = useState<Review[]>([
     { id: "1", userName: "musiclover23", rating: 5, reviewText: "This album is absolutely incredible. Every track is a masterpiece and the production quality is outstanding.", createdAt: "2024-01-15" },
     { id: "2", userName: "vinylcollector", rating: 4, reviewText: "Solid album with great vibes. Some tracks really stand out, though there are a few weaker moments.", createdAt: "2024-01-10" },
     { id: "3", userName: "soundexplorer", rating: 5, reviewText: "A timeless classic. The artist really delivered on this one. Perfect for late-night listening.", createdAt: "2024-01-05" },
   ]);
+
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   useEffect(() => {
     params.then(({ id }) => setAlbumId(id));
@@ -47,13 +50,11 @@ export default function AlbumPage({ params }: AlbumPageProps) {
     })();
   }, [albumId]);
 
-  // … keep your loading/error UI the same as before …
-
   if (loading) {
     return (
       <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
         <Header />
-        {/* (your skeleton UI unchanged) */}
+        {/* skeleton... */}
       </main>
     );
   }
@@ -62,7 +63,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
     return (
       <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
         <Header />
-        {/* (your error UI unchanged) */}
+        {/* error UI... */}
       </main>
     );
   }
@@ -110,7 +111,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
               )}
             </div>
 
-            {/* CTA buttons unchanged */}
+            {/* CTAs */}
             <div className="flex gap-4">
               <a
                 href={album.external_urls.spotify}
@@ -118,12 +119,13 @@ export default function AlbumPage({ params }: AlbumPageProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-6 py-3 text-sm font-medium text-white hover:bg-violet-600 transition"
               >
-                {/* spotify icon … */}
                 Play on Spotify
               </a>
 
-              <button className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-6 py-3 text-sm font-medium text-white hover:bg-zinc-800 transition">
-                {/* star icon … */}
+              <button
+                onClick={() => setIsReviewOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-6 py-3 text-sm font-medium text-white hover:bg-zinc-800 transition"
+              >
                 Review Album
               </button>
             </div>
@@ -140,6 +142,27 @@ export default function AlbumPage({ params }: AlbumPageProps) {
           <ReviewsPanel reviews={reviews} />
         </div>
       </div>
+
+      {/* Review Modal */}
+      <ReviewDialog
+        open={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        albumName={album.name}
+        onSubmit={({ rating, reviewText }) => {
+          // TODO: replace with POST to your reviews API later
+          setReviews((prev) => [
+            {
+              id: String(Date.now()),
+              userName: "You",
+              rating,
+              reviewText,
+              createdAt: new Date().toISOString().slice(0, 10),
+            },
+            ...prev,
+          ]);
+          setIsReviewOpen(false);
+        }}
+      />
     </main>
   );
 }

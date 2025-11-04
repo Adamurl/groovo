@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Header from "./components/Header";
 
 export default function NewReleases() {
   const [albums, setAlbums] = useState<any[]>([]);
@@ -16,28 +17,7 @@ export default function NewReleases() {
   return (
     
     <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-            <div className="h-6 w-6 rounded-md bg-violet-500" />
-            <span className="text-lg font-semibold tracking-tight">Groovo</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/discover" 
-              className="text-sm text-zinc-400 hover:text-white transition"
-            >
-              Discover
-            </Link>
-            <Link 
-              href="/profile" 
-              className="text-sm text-zinc-400 hover:text-white transition"
-            >
-              Profile
-            </Link>
-          </div>
-        </div>
-      </div>
+      <Header />
       <h1 className="mb-4 text-2xl font-semibold">Top New Releases</h1>
       {loading ? (
         <p className="text-sm text-zinc-400">Loading…</p>

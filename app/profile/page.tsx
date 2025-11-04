@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import UserHeader from "@/app/profile/UserHeader";
 import SavedAlbumsGrid from "@/app/profile/SavedAlbumsGrid";
+import Header from "../components/Header";
 
 interface UserProfile {
   _id: string;
@@ -96,19 +97,8 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="flex items-center gap-2">
-          <Link href="/">
-            <div className="h-6 w-6 rounded-md bg-violet-500" />
-          </Link>
-          <Link href="/">
-            <span className="text-lg font-semibold tracking-tight hover:text-violet-400 transition">
-              Groovo
-            </span>
-          </Link>
-        </div>
-      </div>
-
+      <Header />
+      {/* Main content */}
       <div className="mx-auto max-w-7xl px-6 pb-12">
         <UserHeader user={userProfile} loading={loading} />
         <div className="mt-8">

@@ -23,25 +23,7 @@ export default function Discover() {
     <main className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
       <Header />
       <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/"
-              className="text-sm text-zinc-400 hover:text-white transition"
-            >
-              Home
-            </Link>
-            <Link 
-              href="/profile" 
-              className="text-sm text-zinc-400 hover:text-white transition"
-            >
-              Profile
-            </Link>
-          </div>
-        </div>
-
         <h1 className="text-2xl font-bold mb-4">Discover Music</h1>
-
         <input
           className="w-full mb-6 rounded-lg border border-white/10 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none transition"
           value={query}

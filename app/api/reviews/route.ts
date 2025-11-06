@@ -5,7 +5,6 @@ import { db } from "@/lib/mongodb";
 import { ensureIndexes } from "@/lib/ensure-indexes";
 import { PageSchema, ReviewCreateSchema } from "@/lib/validation";
 
-
 /**
  * Docs:
  * - Next.js Route Handlers: https://nextjs.org/docs/app/building-your-application/routing/route-handlers
@@ -13,8 +12,6 @@ import { PageSchema, ReviewCreateSchema } from "@/lib/validation";
  * - MongoDB Node.js Driver: https://www.mongodb.com/docs/drivers/node/current/
  * - createIndexes: https://www.mongodb.com/docs/drivers/node/current/indexes/
  */
-
-
 
 export const runtime = "nodejs";
 

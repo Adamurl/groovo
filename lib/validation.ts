@@ -6,16 +6,23 @@ export const PageSchema = z.object({
 });
 
 export const ReviewCreateSchema = z.object({
-  albumId: z.string().min(1), 
-  rating: z.number().refine(n => n >= 1 && n <= 5 && Number.isInteger(n * 2), {
-    message: "Rating must be 1–5 in 0.5 steps",
-  }),
-  body: z.string().trim().min(1).max(5000),
-  album: z.object({
-    name: z.string(),
-    artists: z.array(z.string()),
-    image: z.string().url().optional(),
-  }).partial().optional(),
+  albumId: z.string().min(1),
+  rating: z.number().int().min(1).max(5),
+  body: z.string().min(1).max(1000),
+  album: z
+    .object({
+      name: z.string(),
+      artists: z.array(z.object({ id: z.string().optional().default(""), name: z.string() })).default([]),
+      images: z.array(
+        z.object({
+          url: z.string().url(),
+          width: z.number().int(),
+          height: z.number().int(),
+        })
+      ).default([]),
+    })
+    .nullable()
+    .optional(),
 });
 
 export const ReviewEditSchema = z.object({

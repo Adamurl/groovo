@@ -44,3 +44,17 @@ export const LikeTargetSchema = z.object({
   targetId: z.string().min(1),
   action: z.enum(["like", "unlike"]),
 });
+
+export const FavoritesTop5ItemSchema = z.object({
+  rank: z.number().int().min(1).max(5),
+  albumId: z.string().min(1),
+});
+
+// Allow 0–5 so users can clear favorites if they want
+export const FavoritesTop5PayloadSchema = z.object({
+  favorites: z
+    .array(FavoritesTop5ItemSchema)
+    .max(5)
+    .refine(arr => new Set(arr.map(x => x.rank)).size === arr.length, "Ranks must be unique")
+    .refine(arr => new Set(arr.map(x => x.albumId)).size === arr.length, "Duplicate albums are not allowed"),
+});

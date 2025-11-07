@@ -5,9 +5,12 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../components/Header";
 import UserHeader from "@/app/profile/UserHeader";
+import AddFavoriteButton from "@/app/components/AddTop5Button";
 import SavedAlbumsGrid, { SavedAlbum } from "@/app/profile/SavedAlbumsGrid";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useUserReviews } from "../hooks/useUserReviews";
+import TopFiveFavoritesView from "./TopFiveFavoritesView";
+
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -97,6 +100,9 @@ export default function ProfilePage() {
         <UserHeader user={currentUser} loading={false} />
 
         <section className="mt-8">
+          <TopFiveFavoritesView />
+        </section>
+        <section className="mt-8">
           <h2 className="text-xl font-semibold mb-4">My Reviews</h2>
           <SavedAlbumsGrid
             albums={albumsForGrid}
@@ -105,6 +111,7 @@ export default function ProfilePage() {
             emptyAs="reviews"
             showRating
             showSnippet
+            renderAction={(a) => <AddFavoriteButton albumId={a.id} />}
           />
         </section>
       </div>

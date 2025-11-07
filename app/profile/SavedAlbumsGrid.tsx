@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ReactNode } from "react";
 
 /**
  * Public UI shape the grid expects. This can represent:
@@ -51,6 +52,7 @@ export interface SavedAlbumsGridProps {
   showSnippet?: boolean;
   onRetry?: () => void;
   onDiscover?: () => void;
+  renderAction?: (album: SavedAlbum) => ReactNode;
 }
 
 export default function SavedAlbumsGrid({
@@ -62,6 +64,7 @@ export default function SavedAlbumsGrid({
   showSnippet = true,
   onRetry,
   onDiscover,
+  renderAction,
 }: SavedAlbumsGridProps) {
   const router = useRouter();
 
@@ -153,50 +156,54 @@ export default function SavedAlbumsGrid({
         const hasRating = showRating && typeof rating === "number";
 
         return (
-          <Link
-            key={album.id}
-            href={`/album/${album.id}`}
-            className="group rounded-lg bg-zinc-800 p-2 hover:bg-zinc-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/60"
-          >
-            {/* Artwork */}
-            <div className="relative mb-2">
-              <img
-                src={cover}
-                alt={`${album.name} cover`}
-                className="w-full aspect-square rounded-md object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+          <div key={album.id} className="rounded-lg">
+            {/* Clickable card */}
+            <Link
+              href={`/album/${album.id}`}
+              className="group block rounded-lg bg-zinc-800 p-2 hover:bg-zinc-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/60"
+            >
+              {/* Artwork */}
+              <div className="relative mb-2">
+                <img
+                  src={cover}
+                  alt={`${album.name} cover`}
+                  className="w-full aspect-square rounded-md object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                {hasRating && (
+                  <div
+                    className="absolute top-2 right-2 rounded-full bg-black/70 px-2 py-1 text-xs font-semibold text-white"
+                    aria-label={`Rating ${rating} out of 5`}
+                  >
+                    ⭐ {rating}/5
+                  </div>
+                )}
+              </div>
 
-              {/* Rating badge (optional) */}
-              {hasRating && (
-                <div
-                  className="absolute top-2 right-2 rounded-full bg-black/70 px-2 py-1 text-xs font-semibold text-white"
-                  aria-label={`Rating ${rating} out of 5`}
-                >
-                  ⭐ {rating}/5
-                </div>
-              )}
-            </div>
-
-            {/* Meta */}
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium text-white group-hover:text-violet-300 transition-colors line-clamp-2">
-                {album.name}
-              </h3>
-
-              <p className="text-xs text-zinc-400 line-clamp-1">
-                {album.artists?.map((a) => a.name).join(", ")}
-              </p>
-
-              {/* Review snippet (optional) */}
-              {showSnippet && album.review?.reviewText && (
-                <p className="text-xs text-zinc-500 line-clamp-2 mt-1">
-                  “{album.review.reviewText}”
+              {/* Meta */}
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium text-white group-hover:text-violet-300 transition-colors line-clamp-2">
+                  {album.name}
+                </h3>
+                <p className="text-xs text-zinc-400 line-clamp-1">
+                  {album.artists?.map((a) => a.name).join(", ")}
                 </p>
-              )}
-            </div>
-          </Link>
+                {showSnippet && album.review?.reviewText && (
+                  <p className="text-xs text-zinc-500 line-clamp-2 mt-1">
+                    “{album.review.reviewText}”
+                  </p>
+                )}
+              </div>
+            </Link>
+
+            {/* Action row (non-link) */}
+            {typeof renderAction === "function" && (
+              <div className="mt-2">
+                {renderAction(album)}
+              </div>
+            )}
+          </div>
         );
       })}
     </div>

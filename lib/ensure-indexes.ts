@@ -23,4 +23,20 @@ export async function ensureIndexes() {
     { key: { targetType: 1, targetId: 1, userId: 1 }, name: "uniq_like", unique: true },
     { key: { targetType: 1, targetId: 1 }, name: "by_target" },
   ]);
+
+
+  await database.collection("follows").createIndexes([
+    { key: { followerId: 1, targetUserId: 1 }, name: "uniq_follow", unique: true },
+    { key: { followerId: 1, createdAt: -1 }, name: "by_follower_created" },
+    { key: { targetUserId: 1, createdAt: -1 }, name: "by_target_created" },
+  ]);
+
+
+
+  await database.collection("users").createIndexes([
+    { key: { username: 1 }, name: "by_username" },
+    { key: { name: 1 }, name: "by_name" },
+  ]);
+
 }
+

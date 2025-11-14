@@ -4,7 +4,7 @@
 import LikeButton from "@/app/components/LikeButton";
 import { CommentItem, fetchComments, postComment } from "@/app/utils/social";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 
 function byParent(top: CommentItem[], replies: CommentItem[]) {
   const map = new Map<string, CommentItem[]>();
@@ -25,12 +25,14 @@ export default function CommentSection({
   reviewLikeCount = 0,
   reviewInitiallyLiked = false,
   onReviewLikeChange,
+  onCommentCountChange,
 }: {
   reviewId: string;
   initialOpen?: boolean;
   reviewLikeCount?: number;
   reviewInitiallyLiked?: boolean;
   onReviewLikeChange?: (liked: boolean, count: number) => void;
+  onCommentCountChange?: Dispatch<SetStateAction<number>>;
 }) {
   const [open, setOpen] = useState(initialOpen);
   const [loading, setLoading] = useState(false);
@@ -38,6 +40,21 @@ export default function CommentSection({
   const [items, setItems] = useState<CommentItem[]>([]);
   const [replies, setReplies] = useState<CommentItem[]>([]);
   const [newBody, setNewBody] = useState("");
+
+  function applyFetchedComments(nextItems: CommentItem[], nextReplies: CommentItem[]) {
+    setItems(nextItems);
+    setReplies(nextReplies);
+    onCommentCountChange?.((prev) => Math.max(prev, nextItems.length + nextReplies.length));
+  }
+
+  async function refreshComments() {
+    try {
+      const { items, replies } = await fetchComments(reviewId, 1, 20);
+      applyFetchedComments(items, replies);
+    } catch {
+      // Ignore refresh errors; UI already surfaces fetch errors elsewhere
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -47,8 +64,7 @@ export default function CommentSection({
     fetchComments(reviewId, 1, 20)
       .then(({ items, replies }) => {
         if (dead) return;
-        setItems(items);
-        setReplies(replies);
+        applyFetchedComments(items, replies);
       })
       .catch((e) => !dead && setErr(e.message || "Failed to load comments"))
       .finally(() => !dead && setLoading(false));
@@ -64,9 +80,8 @@ export default function CommentSection({
     try {
       await postComment(reviewId, text);
 
-      const { items, replies } = await fetchComments(reviewId, 1, 20);
-      setItems(items);
-      setReplies(replies);
+      onCommentCountChange?.((prev) => prev + 1);
+      await refreshComments();
     } catch (e) {
 
     }
@@ -126,11 +141,8 @@ export default function CommentSection({
                       comment={c}
                       reviewId={reviewId}
                       repliesByParent={repliesByParent}
-                      onRefresh={async () => {
-                        const { items, replies } = await fetchComments(reviewId, 1, 20);
-                        setItems(items);
-                        setReplies(replies);
-                      }}
+                      onRefresh={refreshComments}
+                      onCommentCountChange={onCommentCountChange}
                     />
                   ))}
                 </ul>
@@ -149,12 +161,14 @@ function CommentItemComponent({
   repliesByParent,
   onRefresh,
   depth = 0,
+  onCommentCountChange,
 }: {
   comment: CommentItem;
   reviewId: string;
   repliesByParent: Map<string, CommentItem[]>;
   onRefresh: () => Promise<void>;
   depth?: number;
+  onCommentCountChange?: Dispatch<SetStateAction<number>>;
 }) {
   const child = repliesByParent.get(String(comment._id)) || [];
   // Nested comment thread depth
@@ -191,6 +205,7 @@ function CommentItemComponent({
           reviewId={reviewId}
           parentId={String(comment._id)}
           onAfter={onRefresh}
+          onCommentCountChange={onCommentCountChange}
         />
       )}
 
@@ -205,6 +220,7 @@ function CommentItemComponent({
               repliesByParent={repliesByParent}
               onRefresh={onRefresh}
               depth={depth + 1}
+              onCommentCountChange={onCommentCountChange}
             />
           ))}
         </ul>
@@ -217,10 +233,12 @@ function InlineReply({
   reviewId,
   parentId,
   onAfter,
+  onCommentCountChange,
 }: {
   reviewId: string;
   parentId: string;
   onAfter?: () => void;
+  onCommentCountChange?: Dispatch<SetStateAction<number>>;
 }) {
   const [val, setVal] = useState("");
   const [busy, setBusy] = useState(false);
@@ -232,6 +250,7 @@ function InlineReply({
     try {
       await postComment(reviewId, text, parentId);
       setVal("");
+      onCommentCountChange?.((prev) => prev + 1);
       onAfter?.();
     } finally {
       setBusy(false);

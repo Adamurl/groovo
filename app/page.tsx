@@ -309,6 +309,15 @@ export default function NewReleases() {
                   </div>
 
                   <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7 text-zinc-100">{r.body}</p>
+                  {/* Link button to go to the dedicated review details page for this feed item */}
+                  <div className="mt-4 flex justify-end">
+                    <Link
+                      href={`/review/${getReviewId(r)}`}
+                      className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-500"
+                    >
+                      Go to review
+                    </Link>
+                  </div>
                   <CommentSection
                     reviewId={getReviewId(r)}
                     reviewLikeCount={Number((r as any).likeCount || 0)}

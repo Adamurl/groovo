@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SavedAlbumsGrid from "@/app/profile/SavedAlbumsGrid";
 import FavoritesEditableGrid from "@/app/profile/TopFiveEditableGrid";
 import { useFavoritesTop5 } from "@/app/hooks/useTop5";
@@ -10,16 +10,27 @@ import {
   dispatchFavoritesUpdated,
   FavoritePutItem,
 } from "@/app/utils/top5";
+import { useCurrentUser } from "@/app/hooks/useCurrentUser";
+
 
 export default function TopFiveFavoritesView({
   userId, // optional: if omitted, API uses the current user
   title = "Top 5 Favorites Albums",
-  isOwner = true,
+  isOwner,   
 }: {
   userId?: string;
   title?: string;
   isOwner?: boolean;
 }) {
+  const { user: me } = useCurrentUser();
+
+  const effectiveIsOwner =
+  typeof isOwner === "boolean"
+      ? isOwner
+      : userId
+      ? me?._id && String(me._id) === String(userId)
+      : true;
+
   const { items, loading, error, refresh } = useFavoritesTop5(userId);
 
   const albumsForGrid = useMemo(() => mapFavoritesToSavedAlbums(items), [items]);
@@ -29,6 +40,14 @@ export default function TopFiveFavoritesView({
   const [removed, setRemoved] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!effectiveIsOwner && editing) {
+      setEditing(false);
+      setRemoved(new Set());
+      setSaveError(null);
+    }
+  }, [effectiveIsOwner, editing]);
 
   const startEdit = () => { setRemoved(new Set()); setSaveError(null); setEditing(true); };
   const cancelEdit = () => { setRemoved(new Set()); setSaveError(null); setEditing(false); };
@@ -40,6 +59,7 @@ export default function TopFiveFavoritesView({
     });
 
   const confirm = async () => {
+    if (!effectiveIsOwner) return;
     setSaving(true);
     setSaveError(null);
     try {
@@ -47,6 +67,7 @@ export default function TopFiveFavoritesView({
         .filter((it) => !removed.has(it.albumId))
         .sort((a, b) => a.rank - b.rank)
         .map((it, idx) => ({ rank: idx + 1, albumId: it.albumId }));
+
       await putFavoritesTop5(kept);
       await refresh();
       setEditing(false);
@@ -65,7 +86,7 @@ export default function TopFiveFavoritesView({
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold">{title}</h2>
 
-        {isOwner && !loading && !error && albumsForGrid.length > 0 && (
+        {effectiveIsOwner && !loading && !error && albumsForGrid.length > 0 && (
           !editing ? (
             <button
               onClick={startEdit}
@@ -104,7 +125,7 @@ export default function TopFiveFavoritesView({
           <h3 className="text-lg font-semibold text-zinc-300 mb-2">No favorites yet</h3>
           <p className="text-sm text-zinc-400">Pin up to five of your all-time favorite albums here.</p>
         </div>
-      ) : !editing ? (
+      ) : !editing || !effectiveIsOwner ? (
         <SavedAlbumsGrid
           albums={albumsForGrid}
           loading={false}

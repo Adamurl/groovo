@@ -58,3 +58,8 @@ export const FavoritesTop5PayloadSchema = z.object({
     .refine(arr => new Set(arr.map(x => x.rank)).size === arr.length, "Ranks must be unique")
     .refine(arr => new Set(arr.map(x => x.albumId)).size === arr.length, "Duplicate albums are not allowed"),
 });
+
+export const FollowToggleSchema = z.object({
+  targetUserId: z.string().trim().min(1),
+  action: z.enum(["follow", "unfollow"]),
+});

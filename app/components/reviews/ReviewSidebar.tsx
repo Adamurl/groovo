@@ -34,6 +34,8 @@ import {
   pluralize,
 } from "../../utils/reviewFormat";
 
+import { useCurrentUser } from "@/app/hooks/useCurrentUser";
+
 interface ReviewerSidebarProps {
   review: ReviewResponse;
   likeCount: number;
@@ -48,6 +50,10 @@ export function ReviewerSidebar({
   commentCount,
   createdAt,
 }: ReviewerSidebarProps) {
+  const { user } = useCurrentUser();
+  // Decide where the profile link should go
+  const profileHref = reviewerProfileHref(review, user?._id);
+  
   return (
     <aside className="w-full max-w-sm space-y-6">
       {/* Reviewer identity card */}
@@ -69,7 +75,7 @@ export function ReviewerSidebar({
           </div>
         </div>
         <Link
-          href={reviewerProfileHref(review)}
+          href={profileHref}
           className="mt-4 inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-white transition hover:bg-zinc-800"
         >
           Visit profile

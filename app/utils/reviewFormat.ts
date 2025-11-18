@@ -116,13 +116,20 @@ export function reviewerInitial(review: ReviewResponse | null): string {
 /**
  * reviewerProfileHref
  * 
- * Returns a URL to the reviewer's profile page.
+ * Returns a URL to the reviewer's profile page, if its yours, returns /profile
  * Priority:
  *   author.id → userId → "/profile" fallback.
  */
-export function reviewerProfileHref(review: ReviewResponse | null): string {
+export function reviewerProfileHref(
+  review: ReviewResponse | null,
+  currentUserId?: string
+): string {
   const id = review?.author?.id ?? review?.userId ?? "";
-  return id ? `/profile/user/${id}` : "/profile";
+  if (!id) return "/profile";
+  if (currentUserId && id === currentUserId) {
+    return "/profile";
+  }
+  return `/profile/user/${id}`;
 }
 
 /**

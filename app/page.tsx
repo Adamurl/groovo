@@ -304,7 +304,13 @@ export default function NewReleases() {
                           {handle(r)}
                         </Link>
                         <span className="text-zinc-600">•</span>
-                        <span className="text-zinc-500">{new Date(r.createdAt).toLocaleString()}</span>
+                        <span className="text-zinc-500">{new Date(r.createdAt).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}</span>
                       </div>
                     </div>
                   </div>

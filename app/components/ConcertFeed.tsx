@@ -50,8 +50,12 @@ export default function ConcertFeed({
 }: ConcertFeedProps) {
   // Generate mock concerts on client side only to avoid hydration mismatch
   const [mockConcerts, setMockConcerts] = useState<ConcertEvent[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Mark as mounted to prevent hydration mismatches
+    setMounted(true);
+    
     // Generate dates only on client side after mount
     const now = Date.now();
     setMockConcerts([
@@ -107,7 +111,8 @@ export default function ConcertFeed({
 
   // Use mock data if no concerts provided (for viewing purposes)
   // Wait for mock data to be generated on client before showing
-  const displayConcerts = concerts.length > 0 ? concerts : mockConcerts.length > 0 ? mockConcerts : [];
+  // Also wait for component to mount to prevent hydration mismatches
+  const displayConcerts = !mounted ? [] : (concerts.length > 0 ? concerts : mockConcerts.length > 0 ? mockConcerts : []);
 
   // Format date for display
   const formatDate = (dateString: string): string => {

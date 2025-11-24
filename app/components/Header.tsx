@@ -8,59 +8,72 @@ interface HeaderProps {
   showSearch?: boolean;
 }
 
-export default function Header({showSearch = true}: HeaderProps) {
+export default function Header({ showSearch = true }: HeaderProps) {
   const { user: currentUser, isLoading: isUserLoading } = useCurrentUser();
   const isLoggedIn = !!currentUser;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-zinc-900/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo + Title */}
+        
+        {/* Left: Logo + Title */}
         <div className="flex items-center gap-2">
-        {/* Logo */}
-        <Link href="/">
-          <div className="h-6 w-6 rounded-md bg-violet-500" />
-        </Link>
-
-        {/* Title */}
-        <Link
-          href="/"
-          className="text-lg font-semibold tracking-tight hover:text-violet-400 transition"
-        >
-          Groovo
-        </Link>
-        <div className="w-6" /> {/* increase width for larger gap */}
-        {/* New Events Tab */}
-        <Link
-          href="/events"
-          className="text-sm text-zinc-400 hover:text-violet-400 transition"
-        >
-          Upcoming Events
-        </Link>
+          <Link href="/">
+            <div className="h-6 w-6 rounded-md bg-violet-500" />
+          </Link>
+          <Link
+            href="/"
+            className="text-lg font-semibold tracking-tight hover:text-violet-400 transition"
+          >
+            Groovo
+          </Link>
         </div>
 
-        {/* Search Bar */}
-        {showSearch && (
-          <SearchBar />
-        )}
+        {/* Center: Search Bar */}
+        {showSearch && <SearchBar />}
 
-        {/* Right side auth area */}
+        {/* Right: auth area */}
         <div className="flex items-center gap-4">
           {isUserLoading ? (
             <span className="text-sm text-zinc-500">…</span>
           ) : isLoggedIn ? (
             <>
-              <Link href="/profile" className="text-sm text-zinc-400 hover:text-white transition">
+              {/* Upcoming Events moved here */}
+              <Link
+                href="/events"
+                className="text-sm text-zinc-400 hover:text-violet-400 transition"
+              >
+                Upcoming Events
+              </Link>
+
+              <Link 
+                href="/profile" 
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
                 Profile
               </Link>
-              <Link href="/api/auth/signout" className="text-sm text-zinc-400 hover:text-white transition">
+
+              <Link 
+                href="/api/auth/signout" 
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
                 Sign out
               </Link>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm text-zinc-400 hover:text-white transition">Login</Link>
-              <Link href="/signup" className="text-sm text-zinc-400 hover:text-white transition">Sign up</Link>
+              <Link 
+                href="/login" 
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
+                Login
+              </Link>
+              <Link 
+                href="/signup" 
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
+                Sign up
+              </Link>
             </>
           )}
         </div>

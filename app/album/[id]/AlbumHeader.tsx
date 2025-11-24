@@ -1,5 +1,4 @@
-"use client";
-
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatAlbumDate } from "@/app/utils/date";
 import type { SpotifyAlbumWithTracks } from "@/app/types/spotify";
@@ -35,7 +34,17 @@ export default function AlbumHeader({ album }: { album: SpotifyAlbumWithTracks }
 
         <h1 className="text-4xl md:text-5xl font-bold mb-4">{album.name}</h1>
         <p className="text-xl text-zinc-300 mb-6">
-          {album.artists.map((a) => a.name).join(", ")}
+          {album.artists.map((artist, index) => (
+            <span key={artist.id}>
+              <Link
+                href={`/artist/${artist.id}`}
+                className="hover:underline text-violet-400 transition"
+              >
+                {artist.name}
+              </Link>
+              {index < album.artists.length - 1 && ", "}
+            </span>
+          ))}
         </p>
 
         <div className="flex flex-wrap gap-4 text-sm text-zinc-400 mb-6">

@@ -17,8 +17,26 @@ export default function Header({showSearch = true}: HeaderProps) {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo + Title */}
         <div className="flex items-center gap-2">
-          <Link href="/"><div className="h-6 w-6 rounded-md bg-violet-500" /></Link>
-          <Link href="/"><span className="text-lg font-semibold tracking-tight hover:text-violet-400 transition">Groovo</span></Link>
+        {/* Logo */}
+        <Link href="/">
+          <div className="h-6 w-6 rounded-md bg-violet-500" />
+        </Link>
+
+        {/* Title */}
+        <Link
+          href="/"
+          className="text-lg font-semibold tracking-tight hover:text-violet-400 transition"
+        >
+          Groovo
+        </Link>
+        <div className="w-6" /> {/* increase width for larger gap */}
+        {/* New Events Tab */}
+        <Link
+          href="/events"
+          className="text-sm text-zinc-400 hover:text-violet-400 transition"
+        >
+          Upcoming Events
+        </Link>
         </div>
 
         {/* Search Bar */}

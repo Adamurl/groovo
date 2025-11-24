@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 /**
@@ -47,59 +48,66 @@ export default function ConcertFeed({
   loading = false,
   error = null,
 }: ConcertFeedProps) {
-  // Mock data for viewing purposes
-  const mockConcerts: ConcertEvent[] = [
-    {
-      id: "mock-1",
-      artist: "Radiohead",
-      eventName: "Radiohead Live in Concert",
-      date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks from now
-      venue: "Madison Square Garden",
-      city: "New York",
-      state: "NY",
-      country: "USA",
-      ticketLink: "https://www.ticketmaster.com/example",
-      imageUrl: undefined,
-    },
-    {
-      id: "mock-2",
-      artist: "Taylor Swift",
-      eventName: "The Eras Tour",
-      date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(), // 3 weeks from now
-      venue: "SoFi Stadium",
-      city: "Los Angeles",
-      state: "CA",
-      country: "USA",
-      ticketLink: "https://www.ticketmaster.com/example",
-      imageUrl: undefined,
-    },
-    {
-      id: "mock-3",
-      artist: "The Weeknd",
-      eventName: "After Hours Til Dawn Tour",
-      date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 1 month from now
-      venue: "Mercedes-Benz Stadium",
-      city: "Atlanta",
-      state: "GA",
-      country: "USA",
-      ticketLink: "https://www.ticketmaster.com/example",
-      imageUrl: undefined,
-    },
-    {
-      id: "mock-4",
-      artist: "Billie Eilish",
-      eventName: "Happier Than Ever World Tour",
-      date: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(), // ~6 weeks from now
-      venue: "O2 Arena",
-      city: "London",
-      country: "UK",
-      ticketLink: "https://www.ticketmaster.com/example",
-      imageUrl: undefined,
-    },
-  ];
+  // Generate mock concerts on client side only to avoid hydration mismatch
+  const [mockConcerts, setMockConcerts] = useState<ConcertEvent[]>([]);
+
+  useEffect(() => {
+    // Generate dates only on client side after mount
+    const now = Date.now();
+    setMockConcerts([
+      {
+        id: "mock-1",
+        artist: "Radiohead",
+        eventName: "Radiohead Live in Concert",
+        date: new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks from now
+        venue: "Madison Square Garden",
+        city: "New York",
+        state: "NY",
+        country: "USA",
+        ticketLink: "https://www.ticketmaster.com/example",
+        imageUrl: undefined,
+      },
+      {
+        id: "mock-2",
+        artist: "Taylor Swift",
+        eventName: "The Eras Tour",
+        date: new Date(now + 21 * 24 * 60 * 60 * 1000).toISOString(), // 3 weeks from now
+        venue: "SoFi Stadium",
+        city: "Los Angeles",
+        state: "CA",
+        country: "USA",
+        ticketLink: "https://www.ticketmaster.com/example",
+        imageUrl: undefined,
+      },
+      {
+        id: "mock-3",
+        artist: "The Weeknd",
+        eventName: "After Hours Til Dawn Tour",
+        date: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(), // 1 month from now
+        venue: "Mercedes-Benz Stadium",
+        city: "Atlanta",
+        state: "GA",
+        country: "USA",
+        ticketLink: "https://www.ticketmaster.com/example",
+        imageUrl: undefined,
+      },
+      {
+        id: "mock-4",
+        artist: "Billie Eilish",
+        eventName: "Happier Than Ever World Tour",
+        date: new Date(now + 45 * 24 * 60 * 60 * 1000).toISOString(), // ~6 weeks from now
+        venue: "O2 Arena",
+        city: "London",
+        country: "UK",
+        ticketLink: "https://www.ticketmaster.com/example",
+        imageUrl: undefined,
+      },
+    ]);
+  }, []);
 
   // Use mock data if no concerts provided (for viewing purposes)
-  const displayConcerts = concerts.length > 0 ? concerts : mockConcerts;
+  // Wait for mock data to be generated on client before showing
+  const displayConcerts = concerts.length > 0 ? concerts : mockConcerts.length > 0 ? mockConcerts : [];
 
   // Format date for display
   const formatDate = (dateString: string): string => {

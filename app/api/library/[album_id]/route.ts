@@ -1,3 +1,4 @@
+// app/api/library/[album_id]/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -11,19 +12,31 @@ function getUserId(session: any): string | null {
 }
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { albumId: string } }
+  req: Request,
+  ctx: { params: Promise<{ album_id: string }> }
 ) {
+  const { album_id } = await ctx.params;        // Fixing delete issue here
+  const albumId = album_id.trim();
+
   const session = await getServerSession(authOptions);
   const userId = getUserId(session);
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const albumId = String(params?.albumId || "").trim();
-  if (!albumId) return NextResponse.json({ error: "albumId required" }, { status: 400 });
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!albumId) {
+    return NextResponse.json({ error: "albumId required" }, { status: 400 });
+  }
 
   await ensureIndexes();
   const database = await db();
+  const albumsCollection = database.collection("albums");
 
-  await database.collection("albums").deleteOne({ userId, albumId });
-  return NextResponse.json({ ok: true });
+  const result = await albumsCollection.deleteOne({ userId, albumId });
+
+  return NextResponse.json({
+    ok: true,
+    deletedCount: result.deletedCount,
+  });
 }

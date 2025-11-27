@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { formatAlbumDate } from "@/app/utils/date";
 import type { SpotifyAlbumWithTracks } from "@/app/types/spotify";
+import AddToLibraryButton from "@/app/components/AddToLibraryButton";
 
 export default function AlbumHeader({ album }: { album: SpotifyAlbumWithTracks }) {
   const router = useRouter();
@@ -54,6 +55,12 @@ export default function AlbumHeader({ album }: { album: SpotifyAlbumWithTracks }
           >
             Play on Spotify
           </a>
+          <AddToLibraryButton
+            albumId={album.id}
+            title={album.name}
+            coverUrl={album.images?.[0]?.url}
+            artists={album.artists?.map((a) => a.name)}
+            />
         </div>
       </div>
     </div>

@@ -46,7 +46,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
                 <AlbumHeader album={album} />
                 {libraryPayload && (
                   <div className="mt-4">
-                    <AddToLibraryButton album={libraryPayload} />
+                    <AddToLibraryButton albumId={libraryPayload.id} title={libraryPayload.title} coverUrl={libraryPayload.coverUrl} artists={libraryPayload.artists} />
                     </div>
                   )}
               </div>

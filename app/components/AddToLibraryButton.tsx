@@ -1,74 +1,73 @@
-// app/components/AddToLibraryButton.tsx
 "use client";
 
-import { useMemo, useTransition } from "react";
-import { useLibrary, type LibraryAlbum } from "@/app/hooks/useLibrary";
+import { useState } from "react";
+import { useLibrary, LibraryAlbum } from "../hooks/useLibrary";
 
-// If you don't use lucide-react, replace icons with text like "+" / "✓"
-const Icon = {
-  Plus: (props: any) => <span {...props}>＋</span>,
-  Check: (props: any) => <span {...props}>✓</span>,
-  Spinner: (props: any) => <span {...props} className="animate-pulse">•</span>,
-};
-
-type Props = {
-  album: LibraryAlbum;
-  variant?: "icon" | "pill";
+type AddToLibraryButtonProps = {
+  albumId: string;
+  title: string;
+  coverUrl?: string;
+  artists?: string[];
   className?: string;
 };
 
 export default function AddToLibraryButton({
-  album,
-  variant = "pill",
-  className,
-}: Props) {
+  albumId,
+  title,
+  coverUrl,
+  artists,
+  className = "",
+}: AddToLibraryButtonProps) {
   const { isSaved, add, remove } = useLibrary();
-  const saved = useMemo(() => isSaved(album.id), [isSaved, album.id]);
-  const [isPending, startTransition] = useTransition();
+  const saved = isSaved(albumId);
+  const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const handleToggle = () =>
-    startTransition(() => {
-      if (saved) remove(album.id);
-      else add(album);
-    });
+  const handleClick = () => {
+    if (busy) return;
 
-  if (variant === "icon") {
-    return (
-      <button
-        aria-label={saved ? "Remove from library" : "Add to library"}
-        onClick={handleToggle}
-        disabled={isPending}
-        className={`h-9 w-9 rounded-full border border-neutral-700 hover:bg-neutral-800 grid place-items-center disabled:opacity-60 ${className ?? ""}`}
-      >
-        {isPending ? (
-          <Icon.Spinner />
-        ) : saved ? (
-          <Icon.Check className="text-sm" />
-        ) : (
-          <Icon.Plus className="text-sm" />
-        )}
-      </button>
-    );
-  }
+    setBusy(true);
+    setMessage(null);
+
+    if (saved) {
+      // Optimistic remove via context
+      remove(albumId);
+      setMessage("Removed from your library.");
+      setBusy(false); // remove is already optimistic in useLibrary
+    } else {
+      const payload: LibraryAlbum = {
+        id: albumId,
+        title,
+        coverUrl,
+        artists,
+      };
+      add(payload); // useLibrary does optimistic add + POST /api/library
+
+      setMessage("Added to your library!");
+      setBusy(false);
+    }
+  };
 
   return (
-    <button
-      onClick={handleToggle}
-      disabled={isPending}
-      className={`inline-flex items-center rounded-2xl border text-sm px-3 py-1.5 transition-all disabled:opacity-60 ${
-        saved
-          ? "bg-green-600/90 border-green-700 hover:bg-green-600"
-          : "bg-neutral-800/70 border-neutral-700 hover:bg-neutral-800"
-      } ${className ?? ""}`}
-    >
-      {isPending ? (
-        <Icon.Spinner className="mr-2" />
-      ) : saved ? (
-        <Icon.Check className="mr-2" />
-      ) : (
-        <Icon.Plus className="mr-2" />
+    <div className={`flex flex-col gap-1 ${className}`}>
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={busy}
+        className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium border border-white/10 transition ${
+          saved
+            ? "bg-emerald-600 text-white hover:bg-emerald-500"
+            : "bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+        } disabled:opacity-60`}
+      >
+        <span>{saved ? "✓ In your library" : "+ Add to library"}</span>
+      </button>
+
+      {message && (
+        <span className="text-xs text-zinc-400">
+          {message}
+        </span>
       )}
-      {saved ? "Added to your Library!" : "Add to Library"}
-    </button>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"; 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/mongodb";
@@ -68,24 +68,30 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userObjectId = user._id instanceof ObjectId ? user._id : new ObjectId(String(user._id));
+    // Canonical ID forms
+    const userObjectId =
+      user._id instanceof ObjectId ? user._id : new ObjectId(String(user._id));
 
-    // 2️⃣ Count albums
-    const albumsCount = await albums.countDocuments({ userId: userObjectId });
+    // 🔑 This string key is what albums/reviews/follows use
+    const userKey = String(userObjectId);
+
+    // 2️⃣ Count albums (library)
+    const albumsCount = await albums.countDocuments({ userId: userKey });
 
     // 3️⃣ Count reviews and followers
-    const reviewsCount = await reviews.countDocuments({ userId: String(userObjectId), deletedAt: null });
-    const followersCount = await follows.countDocuments({ targetUserId: String(userObjectId) });
+    const reviewsCount = await reviews.countDocuments({
+      userId: userKey,
+      deletedAt: null,
+    });
+    const followersCount = await follows.countDocuments({
+      targetUserId: userKey,
+    });
 
-    // Attach stats to user object
-    user.albumsCount = albumsCount;
-    user.reviewsCount = reviewsCount;
-    user.followersCount = followersCount;
     user.bio = user.bio || "This user has no bio yet.";
 
-    // 4️⃣ Fetch saved albums
+    // 4️⃣ Fetch saved albums using the same string key (if you still need them)
     const savedAlbums = await albums
-      .find({ userId: userObjectId })
+      .find({ userId: userKey })
       .toArray()
       .catch(() => []);
 

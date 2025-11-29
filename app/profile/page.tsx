@@ -10,6 +10,7 @@ import SavedAlbumsGrid, { SavedAlbum } from "@/app/profile/SavedAlbumsGrid";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useUserReviews } from "../hooks/useUserReviews";
 import TopFiveFavoritesView from "./TopFiveFavoritesView";
+import Link from "next/link"; 
 
 
 export default function ProfilePage() {
@@ -99,6 +100,20 @@ export default function ProfilePage() {
 
         <section className="mt-8">
           <TopFiveFavoritesView />
+        </section>
+        <section className="mt-8">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">My Library</h2>
+            <Link
+              href="/library"
+              className="text-sm font-medium text-purple-400 hover:text-purple-300 hover:underline"
+            >
+              Open Library
+            </Link>
+          </div>
+          <p className="text-sm text-zinc-400">
+            View and manage your saved albums.
+          </p>
         </section>
         <section className="mt-8">
           <h2 className="text-xl font-semibold mb-4">My Reviews</h2>

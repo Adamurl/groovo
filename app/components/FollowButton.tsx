@@ -18,9 +18,6 @@
  *
  * Notes:
  *   - Uses optimistic updates, reverts on failure
- *
- * Contributions (Shawn):
- *   - Implemented FollowButton component with optimistic updates
  */
 
 "use client";

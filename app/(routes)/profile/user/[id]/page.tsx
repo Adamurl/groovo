@@ -21,9 +21,6 @@
  *
  * Notes:
  *   - Top 5 section is editable only when viewer.isSelf is true
- *
- * Contributions (Shawn):
- *   - Implemented public user profile page with reviews and Top 5 display
  */
 
 "use client";

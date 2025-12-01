@@ -91,15 +91,25 @@ export function reviewerDisplayName(review: ReviewResponse | null): string {
  *
  * Builds an @handle string for a reviewer.
  * Priority:
- *   username → name → trimmed userId → "@unknown"
+ *   author.username → author.name → legacy user.username → trimmed userId → "@unknown"
  */
 export function reviewerHandle(review: ReviewResponse | null): string {
   if (!review) return "@unknown";
+
+  // New canonical shape (what useReviewDetails expects)
   if (review.author?.username) return `@${review.author.username}`;
   if (review.author?.name) return `@${review.author.name}`;
+
+  // Legacy list shape: some endpoints return `user.username` instead of `author`
+  const legacyUser = (review as any).user;
+  if (legacyUser?.username) return `@${legacyUser.username}`;
+
+  // Last resort: slice from userId
   if (review.userId) return `@${review.userId.slice(0, 6)}`;
+
   return "@unknown";
 }
+
 
 /**
  * reviewerInitial

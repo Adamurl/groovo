@@ -1,5 +1,7 @@
 // utils/reviews.ts
 
+import type { ReviewResponse } from "../types/reviews";
+
 // ---------- Types ----------
 
 export type AlbumSnapshotForDb = {
@@ -8,7 +10,7 @@ export type AlbumSnapshotForDb = {
   images: Array<{ url: string; width: number; height: number }>;
 };
 
-/** Raw review doc as returned by /api/reviews (Mongo-ish) */
+/** Legacy raw review doc (older Mongo-ish shape, may not be used anymore) */
 export type ApiReview = {
   _id?: string | { $oid: string };
   id?: string;
@@ -19,7 +21,7 @@ export type ApiReview = {
   user?: { username?: string; image?: string } | null;
 };
 
-/** UI-facing review shape (what ReviewsPanel expects) */
+/** UI-facing review shape (old ReviewsPanel expectation) */
 export type UIReview = {
   id: string;
   userName: string;
@@ -43,7 +45,7 @@ export type PostReviewResult =
   | { ok: false; status: number; message: string };
 
 export type FetchReviewsResult =
-  | { ok: true; items: UIReview[] }
+  | { ok: true; items: ReviewResponse[] }
   | { ok: false; message: string };
 
 // ---------- Helpers ----------
@@ -56,11 +58,11 @@ function extractId(r: ApiReview): string {
   return crypto.randomUUID();
 }
 
-/** Map ApiReview -> UIReview (keeps UI components dumb/simple) */
+/** Map ApiReview -> UIReview (kept for older components) */
 export function mapApiReviewToUI(r: ApiReview): UIReview {
   return {
     id: extractId(r),
-    userName: r?.user?.username ?? "Anonymous",
+    userName: r?.user?.username ?? "Place",
     rating: Number(r?.rating ?? 0),
     reviewText: String(r?.body ?? ""),
     createdAt: String(r?.createdAt ?? new Date().toISOString()),
@@ -99,9 +101,12 @@ export type PostReviewArgs = {
   album: AlbumSnapshotForDb | null;
 };
 
-
 async function safeJson(res: Response) {
-  try { return await res.json(); } catch { return null; }
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 /** Normalize common API error bodies (Zod arrays, strings, etc.) */
@@ -135,7 +140,10 @@ export async function postReview(payload: PostReviewArgs): Promise<PostReviewRes
   }
 }
 
-/** GET /api/reviews?albumId=... (single page) */
+/** GET /api/reviews?albumId=... (single page)
+ *
+ * New behavior: return backend-typed ReviewResponse[]
+ */
 export async function fetchReviewsPage(params: {
   albumId: string;
   page?: number;
@@ -157,7 +165,7 @@ export async function fetchReviewsPage(params: {
     return { ok: false, message: normalizeErrorBody(body) };
   }
 
-  const data = await res.json(); // { items: ApiReview[] }
-  const items: UIReview[] = (data?.items ?? []).map(mapApiReviewToUI);
+  const data = await res.json() as { items?: ReviewResponse[] };
+  const items: ReviewResponse[] = data?.items ?? [];
   return { ok: true, items };
 }

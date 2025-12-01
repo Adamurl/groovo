@@ -2,25 +2,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-export interface ReviewApiItem {
-  _id: string;
-  userId: string;
-  albumId: string;
-  rating: number;
-  body: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  albumSnapshot?: {
-    name: string;
-    artists: Array<{ id: string; name: string }>;
-    images: Array<{ url: string; width: number; height: number }>;
-  };
-}
+import type { UserReviewApiItem } from "../types/reviews";
 
 interface UseUserReviewsResult {
-  items: ReviewApiItem[];
+  items: UserReviewApiItem[];
   loading: boolean;
   error: string | null;
 }
@@ -35,7 +20,7 @@ export function useUserReviews(
   page = 1,
   pageSize = 20
 ): UseUserReviewsResult {
-  const [items, setItems] = useState<ReviewApiItem[]>([]);
+  const [items, setItems] = useState<UserReviewApiItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);

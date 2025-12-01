@@ -55,7 +55,7 @@ export default function AddToLibraryButton({
     <button
       onClick={handleToggle}
       disabled={isPending}
-      className={`inline-flex items-center rounded-2xl border text-sm px-3 py-1.5 transition-all disabled:opacity-60 ${
+      className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
         saved
           ? "bg-green-600/90 border-green-700 hover:bg-green-600"
           : "bg-neutral-800/70 border-neutral-700 hover:bg-neutral-800"

@@ -1,16 +1,11 @@
-// components/ReviewsPanel.tsx
-import ShareButton from "./ShareButton";
+"use client";
 
-export type Review = {
-  id: string;
-  userName: string;
-  rating: number;
-  reviewText: string;
-  createdAt: string; // ISO date
-};
+import ShareButton from "./ShareButton";
+import type { ReviewResponse } from "@/app/types/reviews";
+import { reviewerHandle } from "@/app/utils/reviewFormat";
 
 interface ReviewsPanelProps {
-  reviews: Review[];
+  reviews: ReviewResponse[];
   title?: string;
   maxHeight?: string;
   /** optional states */
@@ -43,7 +38,7 @@ export default function ReviewsPanel({
     );
   }
 
-  if (reviews.length === 0) {
+  if (!reviews || reviews.length === 0) {
     return (
       <section className="rounded-2xl border border-white/10 bg-zinc-900/60 p-4">
         <h3 className="mb-3 text-lg font-semibold">{title}</h3>
@@ -67,16 +62,20 @@ export default function ReviewsPanel({
                 })}
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-violet-300 font-semibold">★ {r.rating}/5</span>
-                <ShareButton
-                  url={`/review/${r.id}`}
-                  label="Share"
-                  size="sm"
-                />
+                <span className="text-violet-300 font-semibold">
+                  ★ {r.rating}/5
+                </span>
+                <ShareButton url={`/review/${r.id}`} label="Share" size="sm" />
               </div>
             </div>
-            <p className="mt-2 text-sm text-zinc-100">{r.reviewText}</p>
-            <p className="mt-1 text-xs text-zinc-400">by {r.userName}</p>
+
+            {/* review text */}
+            <p className="mt-2 text-sm text-zinc-100">{r.body}</p>
+
+            {/* reviewer display */}
+            <p className="mt-1 text-xs text-zinc-400">
+              Reviewer: {reviewerHandle(r)}
+            </p>
           </li>
         ))}
       </ul>

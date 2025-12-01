@@ -29,3 +29,9 @@ export type ReviewResponse = {
   author?: ReviewAuthor;
   viewerLiked?: boolean;
 };
+
+export type UserReviewApiItem = ReviewResponse & {
+  _id?: string;
+  deletedAt?: string | null;
+};
+

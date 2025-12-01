@@ -53,104 +53,111 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   await ensureIndexes();
+  const session = await getServerSession(authOptions);
+  const database = await db();
+
   const url = new URL(req.url);
   const albumId = url.searchParams.get("albumId");
-  const userId = url.searchParams.get("userId");
-  const global = url.searchParams.get("global") === "true";
+  const page = Number(url.searchParams.get("page") ?? 1) || 1;
+  const pageSize = Number(url.searchParams.get("pageSize") ?? 20) || 20;
 
-  const page = PageSchema.parse({
-    page: url.searchParams.get("page") ?? undefined,
-    pageSize: url.searchParams.get("pageSize") ?? undefined,
-  });
+  if (!albumId) {
+    return NextResponse.json({ error: "Missing albumId" }, { status: 400 });
+  }
 
-  const database = await db();
-  const q: any = { deletedAt: null };
-  if (albumId) q.albumId = albumId;
-  if (userId) q.userId = userId;
+  // 1) Query reviews for this album (exclude soft-deleted)
+  const query = {
+    albumId,
+    deletedAt: null,
+  };
 
-  const items = await database.collection("reviews")
-    .find(q)
+  const reviews = await database
+    .collection("reviews")
+    .find(query)
     .sort({ createdAt: -1 })
-    .skip((page.page - 1) * page.pageSize)
-    .limit(page.pageSize)
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
     .toArray();
 
-  // Always explicitly map items to ensure proper serialization, especially albumSnapshot
-  const mappedItems = items.map((r) => ({
-    _id: String(r._id),
-    id: String(r._id),
-    userId: r.userId,
-    albumId: r.albumId,
-    rating: r.rating,
-    body: r.body,
-    likeCount: r.likeCount ?? 0,
-    commentCount: r.commentCount ?? 0,
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
-    albumSnapshot: r.albumSnapshot ?? null, // Always preserve albumSnapshot
-  }));
+  if (reviews.length === 0) {
+    return NextResponse.json({ items: [] });
+  }
 
-  // If global feed, fetch user info and like status
-  if (global) {
-    const session = await getServerSession(authOptions);
-    const viewerId = session?.user?.id ?? null;
-    const users = database.collection("users");
-    const uniqueUserIds = Array.from(new Set(items.map((r) => r.userId).filter(Boolean)));
-    
-    const authorObjectIds: ObjectId[] = [];
-    for (const s of uniqueUserIds) {
-      try {
-        authorObjectIds.push(new ObjectId(s));
-      } catch {
-        // Skip invalid ObjectIds
+  // 2) Collect distinct userIds and reviewIds
+  const userIds = Array.from(
+    new Set(
+      reviews
+        .map((r: any) => r.userId)
+        .filter(Boolean)
+    )
+  );
+
+  const reviewIds = reviews.map((r: any) => String(r._id));
+
+  // 3) Fetch all authors in one go
+  const users = await database
+    .collection("users")
+    .find(
+      {
+        _id: { $in: userIds.map((id) => new ObjectId(String(id))) },
+      },
+      {
+        projection: { _id: 1, username: 1, name: 1, image: 1 },
       }
-    }
+    )
+    .toArray();
 
-    const authorDocs = authorObjectIds.length
-      ? await users
-          .find(
-            { _id: { $in: authorObjectIds } },
-            { projection: { _id: 1, username: 1, name: 1, image: 1 } }
-          )
-          .toArray()
-      : [];
-
-    const byId = new Map<string, { username?: string | null; name?: string | null; image?: string | null }>();
-    for (const u of authorDocs) {
-      byId.set(String(u._id), {
+  const authorById = new Map<
+    string,
+    { id: string; username?: string | null; name?: string | null; image?: string | null }
+  >(
+    users.map((u: any) => [
+      String(u._id),
+      {
+        id: String(u._id),
         username: u.username ?? null,
         name: u.name ?? null,
         image: u.image ?? null,
-      });
-    }
-
-    // Check which reviews the user has liked
-    const reviewIds = items.map((r) => String(r._id));
-    const likedReviewIds = new Set<string>();
-    if (viewerId && reviewIds.length > 0) {
-      const likes = await database.collection("likes")
-        .find({
-          targetType: "review",
-          targetId: { $in: reviewIds },
-          userId: viewerId,
-        })
-        .toArray();
-      likes.forEach((l) => likedReviewIds.add(l.targetId));
-    }
-
-    const out = mappedItems.map((r) => ({
-      ...r,
-      author: {
-        id: r.userId,
-        username: byId.get(String(r.userId))?.username ?? null,
-        name: byId.get(String(r.userId))?.name ?? null,
-        image: byId.get(String(r.userId))?.image ?? null,
       },
-      viewerLiked: likedReviewIds.has(String(r._id)),
-    }));
+    ])
+  );
 
-    return NextResponse.json({ items: out });
+  // 4) Fetch likes for the current viewer (if logged in)
+  let likedSet = new Set<string>();
+  if (session?.user?.id) {
+    const likes = await database
+      .collection("likes")
+      .find({
+        targetType: "review",
+        userId: session.user.id,
+        targetId: { $in: reviewIds },
+      })
+      .toArray();
+
+    likedSet = new Set(likes.map((l: any) => String(l.targetId)));
   }
 
-  return NextResponse.json({ items: mappedItems });
+  // 5) Normalize to ReviewResponse[]
+  const items = reviews.map((review: any) => {
+    const author = authorById.get(String(review.userId)) ?? null;
+
+    return {
+      _id: String(review._id),
+      id: String(review._id),
+      userId: review.userId,
+      albumId: review.albumId,
+      rating: review.rating,
+      body: review.body,
+      likeCount: review.likeCount ?? 0,
+      commentCount: review.commentCount ?? 0,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+      deletedAt: review.deletedAt ?? null,
+      albumSnapshot: review.albumSnapshot ?? null,
+      author,
+      viewerLiked: likedSet.has(String(review._id)),
+    };
+  });
+
+  return NextResponse.json({ items });
 }

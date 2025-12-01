@@ -5,7 +5,7 @@ import ReviewsPanel from "@/app/components/ReviewsPanel";
 import ReviewDialog from "@/app/components/ReviewDialog";
 import type { SpotifyAlbumWithTracks } from "@/app/types/spotify";
 import { fetchReviewsPage } from "@/app/utils/reviews";
-import type { UIReview } from "@/app/utils/reviews";
+import type { ReviewResponse } from "@/app/types/reviews";
 
 export default function ReviewSection({
   albumId,
@@ -14,7 +14,7 @@ export default function ReviewSection({
   albumId: string;
   album: SpotifyAlbumWithTracks;
 }) {
-  const [reviews, setReviews] = useState<UIReview[]>([]);
+  const [reviews, setReviews] = useState<ReviewResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
@@ -22,13 +22,16 @@ export default function ReviewSection({
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
+
     const res = await fetchReviewsPage({ albumId, page: 1, pageSize: 20 });
+
     if (!res.ok) {
       setError(res.message);
       setReviews([]);
     } else {
       setReviews(res.items);
     }
+
     setLoading(false);
   }, [albumId]);
 

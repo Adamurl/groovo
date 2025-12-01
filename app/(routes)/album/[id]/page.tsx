@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import AlbumHeader from "./components/AlbumHeader";
 import ReviewSection from "./components/ReviewSection";
-import CompactTracklist from "@/app/components/CompactTracklist";
+import CompactTracklist from "@/app/(routes)/album/[id]/components/CompactTracklist";
 import { useAlbum } from "@/app/hooks/useAlbum";
 
 interface AlbumPageProps {

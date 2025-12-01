@@ -1,3 +1,42 @@
+/**
+ * Purpose:
+ *   The API endpoint for  backend, for managing a user's Library (saved albums).
+ *
+ * Scope:
+ *   - Used by the Library page and "Add to Library" button on album pages
+ *   - GET  /api/library - returns all albums saved by a user
+ *   - POST /api/library - saves a new album to the user's Library 
+ *   - Uses NextAuth to ensure requests are user-specific and protected
+ *
+ * Role:
+ *   GET handler:
+ *     - Authenticates the user
+ *     - Fetches all (userId, album) entries from the "albums" collection
+ *     - Sorts the albums by savedAt: -1 (most recent first)
+ *     - Returns a full list of the user's saved albums
+ *
+ *   POST handler:
+ *     - Authenticates the user
+ *     - Handles incoming album metadata (albumId, title, coverUrl, artists)
+ *     - Prevent invalid inserts 
+ *     - Inserts a new library entry (avoids duplicates using userId + albumId)
+ *
+ * Deps:
+ *   - next-auth (getServerSession) for authentication
+ *   - lib/mongodb for DB connection
+ *   - ensureIndexes() to guarantee required indexes on the albums collection
+ *
+ * Notes:
+ *   - "upsert" ensures that saving the same album twice does not create duplicates
+ *   - Everything done is scoped to a specific user's userId
+ *   - Renders album cards in the Library UI using metadata
+ *
+ * Contributions (Srikar):
+ *   - Implemented the Library feature's backend API routes
+ *   - Wired the "Add to Library" functionality to this POST route
+ *   - Debugged issues with albums not saving or overwriting incorrectly
+ */
+
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";

@@ -14,7 +14,7 @@
  *
  * Deps:
  *   - React (useState, useEffect)
- *   - /api/top-albums-week backend route (Billboard → Spotify enrichment pipeline)
+ *   - /app/utils/topAlbums (backend route for Billboard → Spotify pipeline)
  *   - mapBillboardToNewReleases utility for reshaping raw Billboard data
  *
  * Notes:

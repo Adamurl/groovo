@@ -1,3 +1,35 @@
+/**
+ * Purpose:
+ *   Client-side page for displaying an authenticated user's saved albums (Library).
+ *
+ * Scope:
+ *   - Renders a grid of saved albums with navigation to album pages, i.e., the library itself
+ *   - Fetches the grid of saved albums after pressing the "open library" button on the profile page
+ *
+ * Role:
+ *   - Manages Library UI, loading albums and album pages
+ *   - Ensures stable rendering even when backend data varies across versions
+ *   - Handles fallback album fields from older back-end formats (albumSnapshot, album, spotifyAlbum)
+ *   - Still includes the Header navigation
+ *
+ * Deps:
+ *   - React (useState, useEffect)
+ *   - next/link for navigation
+ *   - /api/library for saved album data
+ *   - Header component for navigation
+ *
+ * Notes:
+ *   - Supports older and current API formats just in case
+ *   - The `cancelled` flag prevents state updates if the component unmounts mid-fetch
+ *   - Uses "no-store" in cache to avoid giving stale library data
+ *
+ * Contributions (Srikar):
+ *   - Implemented the entire Library page UI, data fetching logic, and state management.
+ *   - Integrated the UI with the GET /api/library backend route and ensured compatibility with
+ *     the Add/Remove Library endpoints.
+ *   - Implemented error handling, empty-state messaging, and album grid-like behavior.
+ */
+
 // app/library/page.tsx
 "use client";
 
